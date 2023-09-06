@@ -44,7 +44,6 @@ impl<T> MyRc<T> {
             *self.count
         }
     }
-    fn weak_count(&self) -> usize { 0 }
 }
 
 impl<T> Drop for MyRc<T> {
@@ -56,6 +55,21 @@ impl<T> Drop for MyRc<T> {
                 drop(Box::from_raw(self.count));
             }
         }
+    }
+}
+
+impl<T> std::ops::Deref for MyRc<T> {
+    type Target = T;
+    fn deref(&self) -> &Self::Target {
+        unsafe {&*(self.data)}
+    }
+}
+
+impl<T> std::fmt::Debug for MyRc<T>
+where T: std::fmt::Debug,
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", **self)
     }
 }
 
@@ -88,8 +102,8 @@ fn main() {
     let my_rc = MyRc::new(27);
     let rc_clone = my_rc.clone();
     println!("part2:");
+    println!("my_rc: {:?}, rc_clone: {:?}", my_rc, rc_clone);
     println!("strong_count: {}", my_rc.strong_count());
-    println!("weak_count: {}", my_rc.weak_count());
     let stack = SimpleStack::new();
     stack.push(1);
     stack.push(2);
